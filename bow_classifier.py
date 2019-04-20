@@ -1,6 +1,7 @@
 import nltk
 import numpy as np
 from nltk.corpus import stopwords
+from sklearn.svm import SVC
 
 stop_words = stopwords.words('english')
 
@@ -34,5 +35,13 @@ def make_bow(corpus):
     
     return vectors
 
-def classify_bow(corpus):
-    pass
+def classify_bow(corpus, labels):
+    X = make_bow(corpus)
+    Y = labels
+    svm = SVC(C=1.0)
+    svm.fit(X[:4], Y)
+    Y_pred = svm.predict(X[4:])
+    return Y_pred
+
+print(classify_bow(["my name is Dima", "hello, World!", "Mafia shit world 228", "hello, my dear slut shit kelly", "U are slut and shit"],
+                   np.array([0, 0, 1, 1])))
