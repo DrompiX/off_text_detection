@@ -2,7 +2,9 @@ import csv
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score, f1_score
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from bow_classifier import train_bow_classifier, predict_with_bow
 from hateword2vec import HateWord2Vec
 from hatedoc2vec import HateDodc2Vec
@@ -47,30 +49,44 @@ def launch():
     }
     ids, corpus, labels = read_data(paths['tweets'])
     vocab = create_vocabulary(corpus)
-    print(sum(np.array(labels) == 0), sum(np.array(labels) == 1))
-    # dirty_list = read_dirty_list(paths['dirty'])
-    # hw2v = HateWord2Vec(paths['background'], paths['w2v'])
-    # hw2v.train(dirty_list, vocab, t=0.955, w=10)
-    # # hw2v.save_model(paths['w2v'])
-    # labels_pred = hw2v.predict(corpus)
-    # print(np.sum(np.array(labels_pred) == np.array(labels)) / len(labels))
-    # print(roc_auc_score(np.array(labels), np.array(labels_pred)))
-    # print(f1_score(np.array(labels), np.array(labels_pred)))
+    # print(sum(np.array(labels) == 0), sum(np.array(labels) == 1))
+    # sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=9)
+    x_train, x_test, y_train, y_test = train_test_split(corpus, labels, test_size=0.25, 
+                                                        stratify=labels, random_state=51)
 
-    hd2v = HateDodc2Vec(corpus)
-    hd2v.train(LogisticRegression(C=10, class_weight='balanced', solver='saga', n_jobs=-1), labels)
-    print(hd2v.predict(["you bitches love yall some corny nigga"]))
-    hd2v_labels_pred = hd2v.predict(corpus)
-    print(np.sum(np.array(hd2v_labels_pred) == np.array(labels)) / len(labels))
+    dirty_list = read_dirty_list(paths['dirty'])
+    hw2v = HateWord2Vec(paths['background'], paths['w2v'])
+    hw2v.train(dirty_list, vocab, t=0.955, w=10)
+    # hw2v.save_model(paths['w2v'])
+    hw2v_labels_pred = hw2v.predict(x_test)
+    print(np.sum(np.array(hw2v_labels_pred) == np.array(y_test)) / len(y_test))
+    # print(roc_auc_score(np.array(labels), np.array(hw2v_labels_pred)))
+    # print(f1_score(np.array(labels), np.array(hw2v_labels_pred)))
+
+    hd2v = HateDodc2Vec(x_train)
+    hd2v.train(LogisticRegression(C=10, class_weight='balanced', solver='saga', n_jobs=-1), y_train)
+    # print(hd2v.predict(["you bitches love yall some corny nigga"]))
+    hd2v_labels_pred = hd2v.predict(x_test)
+    print(np.sum(np.array(hd2v_labels_pred) == np.array(y_test)) / len(y_test))
     # print(hd2v.model.infer_vector(preprocess("you bitches love yall some corny nigga")))
     
     # print(len(hd2v.model.docvecs.vectors_docs))
 
-    # model = RandomForestClassifier(10)
-    # model = train_bow_classifier(corpus, labels, model, paths)
-    # print(predict_with_bow(np.array(["hey, you are slut and bitch!"]), model))
-    # print(predict_with_bow(np.array(["Thank you! You are really kind!"]), model))
+    rf_model = RandomForestClassifier(n_estimators=25, class_weight='balanced', n_jobs=-1, verbose=1, min_samples_leaf=1)
+    rf_model = train_bow_classifier(x_train, vocab, y_train, rf_model, paths)
+    # print(predict_with_bow(np.array(["hey, you are slut and bitch!"]), vocab, rf_model))
+    # print(predict_with_bow(np.array(["Thank you! You are really kind!"]), vocab, rf_model))
+    rf_labels_pred = predict_with_bow(x_test, vocab, rf_model)
+    print(np.sum(np.array(rf_labels_pred) == np.array(y_test)) / len(y_test))
 
+    # good_prob = sum(np.array(labels) == 0) / len(labels)
+    # bad_prob = 1 - good_prob
+    meta_clf = MultinomialNB()#class_prior=[good_prob, bad_prob])
+    X_meta = np.column_stack((hw2v_labels_pred, hd2v_labels_pred, rf_labels_pred))
+    meta_clf.fit(X_meta, y_test)
+    meta_labels_pred = meta_clf.predict(X_meta)
+    print(np.sum(np.array(meta_labels_pred) == np.array(y_test)) / len(y_test))
+    
 
 if __name__ == '__main__':
     launch()
