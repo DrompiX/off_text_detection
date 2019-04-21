@@ -1,37 +1,17 @@
 import os
-import nltk
 import pickle
 import numpy as np
-from nltk.corpus import stopwords
 from sklearn.svm import SVC
+from utils import tokenize, preprocess
 
-stop_words = stopwords.words('english')
-
-vocab = []
-
-def tokenize(text):
-    return nltk.word_tokenize(text)
-
-def preprocess(text, remove_stop=True):
-    tokenized = tokenize(text.lower())
-    if remove_stop:
-        return [w for w in tokenized if w.isalpha() and w not in stop_words]
-    else:
-        return [w for w in tokenized if w.isalpha()]
-
-def create_vocabulary(corpus):
-    global vocab
-    words = []
-    for text in corpus:  
-        words.extend(preprocess(text))
-    vocab = sorted(list(set(words)))
+# vocab = []
     # return sorted(list(set(words)))
 
-def make_bow(corpus, save_path=None):
-    global vocab
+
+def make_bow(texts, vocab, save_path=None):
     if save_path is None or not os.path.isfile(save_path):
-        vectors = np.zeros((len(corpus), len(vocab)))
-        for t_id, text in enumerate(corpus):
+        vectors = np.zeros((len(texts), len(vocab)))
+        for t_id, text in enumerate(texts):
             words = preprocess(text)
             bag_vector = np.zeros(len(vocab))
             for w in words:
@@ -52,9 +32,10 @@ def make_bow(corpus, save_path=None):
     
     return vectors
 
-def train_bow_classifier(corpus, labels, model, paths):
-    create_vocabulary(corpus)
-    X = make_bow(corpus, paths['BOW'])
+
+def train_bow_classifier(corpus, vocab, labels, model, paths):
+    # create_vocabulary(corpus)
+    X = make_bow(corpus, vocab, paths['BOW'])
     print(f'X created, {X.shape}')
     Y = np.array(labels)
     print(f'Y created, {Y.shape}')
@@ -66,8 +47,8 @@ def train_bow_classifier(corpus, labels, model, paths):
     return model
 
 
-def predict_with_bow(samples, model):
-    X_test = make_bow(samples)
+def predict_with_bow(samples, vocab, model):
+    X_test = make_bow(samples, vocab)
     # print(X_test)
     return model.predict(X_test)
 
