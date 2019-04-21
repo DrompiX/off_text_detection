@@ -26,30 +26,43 @@ class HateWord2Vec(object):
         """
         # self.dirty_list = dirty_list
         new_dirty_list = dirty_list.copy()
-        for word in vocab:
+        for word in vocab:#set(list(self.model.wv.vocab) + vocab):
             cur_w = 0
             # print(word)
             for dirty in dirty_list:
                 if word in self.model.wv.vocab and dirty in self.model.wv.vocab:
                     similarity = self.model.wv.similarity(word, dirty)
                     if similarity > t:
+                        # print(word, dirty, similarity)
                         cur_w += 1
-                    # print(dirty, similarity)
-            # print(cur_w)
             # input()
+
             if cur_w >= w:
                 new_dirty_list.append(word)
+        
+        self.dirty_list = new_dirty_list
         print('New dirty list')
         print(new_dirty_list)
-                # print(hw2v.model.wv.similarity('anal', w))
 
     
-    def predict(self):
-        pass
+    def predict(self, texts):
+        results = []
+        for text in texts:
+            words = set(preprocess(text))
+            offensive = False
+            for word in words:
+                if word in self.dirty_list:
+                    offensive = True
+                    break
+            
+            results.append(1 if offensive else 0)
+        
+        return results
+                    
     
     def _build_model(self, path_to_corp):
         data = self._read_data(path_to_corp)
-        model = gensim.models.Word2Vec(data, size=100, window=10, min_count=2, workers=4)
+        model = gensim.models.Word2Vec(data, size=100, window=10, min_count=1, workers=4)
         print('Start training model...')
         model.train(data, total_examples=len(data), epochs=15)
         print('Model training finished!')

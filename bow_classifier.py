@@ -1,11 +1,7 @@
 import os
 import pickle
 import numpy as np
-from sklearn.svm import SVC
-from utils import tokenize, preprocess
-
-# vocab = []
-    # return sorted(list(set(words)))
+from utils import preprocess
 
 
 def make_bow(texts, vocab, save_path=None):
@@ -34,23 +30,16 @@ def make_bow(texts, vocab, save_path=None):
 
 
 def train_bow_classifier(corpus, vocab, labels, model, paths):
-    # create_vocabulary(corpus)
     X = make_bow(corpus, vocab, paths['BOW'])
     print(f'X created, {X.shape}')
     Y = np.array(labels)
     print(f'Y created, {Y.shape}')
-    # svm = SVC(C=1.0)
     print('Training model...')
     model.fit(X, Y)
     print('Model was trained!')
-    # Y_pred = svm.predict(X[4:])
     return model
 
 
 def predict_with_bow(samples, vocab, model):
     X_test = make_bow(samples, vocab)
-    # print(X_test)
     return model.predict(X_test)
-
-# print(classify_bow(["my name is Dima", "hello, World!", "Mafia shit world 228", "hello, my dear slut shit kelly", "U are slut and shit"],
-#                    np.array([0, 0, 1, 1])))
