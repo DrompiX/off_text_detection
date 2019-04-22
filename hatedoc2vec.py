@@ -4,7 +4,7 @@ import gensim
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 from utils import preprocess
 
-class HateDodc2Vec(object):
+class HateDoc2Vec(object):
 
     def __init__(self, corpus, model_path=None):
         if model_path is None:

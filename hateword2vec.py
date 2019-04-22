@@ -24,25 +24,21 @@ class HateWord2Vec(object):
             t {[type]} -- threshold for similarity between words
             w {[type]} -- threshold for 
         """
-        # self.dirty_list = dirty_list
         new_dirty_list = dirty_list.copy()
-        for word in vocab:#set(list(self.model.wv.vocab) + vocab):
+        for word in vocab:
             cur_w = 0
-            # print(word)
             for dirty in dirty_list:
                 if word in self.model.wv.vocab and dirty in self.model.wv.vocab:
                     similarity = self.model.wv.similarity(word, dirty)
                     if similarity > t:
-                        # print(word, dirty, similarity)
                         cur_w += 1
-            # input()
 
             if cur_w >= w:
                 new_dirty_list.append(word)
         
         self.dirty_list = new_dirty_list
-        print('New dirty list')
-        print(new_dirty_list)
+        # print('New dirty list')
+        # print(new_dirty_list)
 
     
     def predict(self, texts):
