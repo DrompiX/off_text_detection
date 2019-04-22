@@ -36,9 +36,9 @@ class BOWClassifier(object):
     
     def fit(self, corpus, labels, path):
         X = self._make_bow(corpus, path)
-        print(f'X created, {X.shape}')
+        # print(f'X created, {X.shape}')
         Y = np.array(labels)
-        print(f'Y created, {Y.shape}')
+        # print(f'Y created, {Y.shape}')
         print('Training model...')
         self.clf.fit(X, Y)
         print('Model was trained!')

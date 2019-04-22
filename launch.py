@@ -6,11 +6,11 @@ from hate2vec import Hate2Vec
 from utils import preprocess
 
 # TODO: remove
-from bow_classifier import BOWClassifier
-from sklearn.ensemble import RandomForestClassifier
-from hateword2vec import HateWord2Vec
-from hatedoc2vec import HateDoc2Vec
-from sklearn.linear_model import LogisticRegression
+# from bow_classifier import BOWClassifier
+# from sklearn.ensemble import RandomForestClassifier
+# from hateword2vec import HateWord2Vec
+# from hatedoc2vec import HateDoc2Vec
+# from sklearn.linear_model import LogisticRegression
 
 
 def read_data(path):
@@ -41,7 +41,9 @@ def read_dirty_list(path):
 
 
 def get_scores(y_true, y_pred):
-    print(np.sum(np.array(y_pred) == np.array(y_true)) / len(y_true))
+    print('Overall accuracy:', np.sum(np.array(y_pred) == np.array(y_true)) / len(y_true))
+    print('F1-score:', f1_score(y_true, y_pred))
+    print('ROC-AUC score:', roc_auc_score(y_true, y_pred))
     print('Total cnt:', len(y_true))
     print('1 cnt:', np.sum(np.array(y_pred) == 1), '| 0 cnt:', np.sum(np.array(y_pred) == 0))
 
@@ -68,32 +70,11 @@ def launch():
     h2v.fit(x_train, y_train, dirty_list)
     h2v_labels_pred = h2v.predict(x_test)
     get_scores(y_test, h2v_labels_pred)
-    
-    # TODO: tune first two models
 
-    # rf_clf = RandomForestClassifier(n_estimators=25, class_weight='balanced', 
-    #                                     n_jobs=-1, min_samples_leaf=3)
-    # bow2clf = BOWClassifier(vocab, rf_clf)
-    # bow2clf.fit(x_train, y_train, paths['BOW'])
-    # bow2clf_labels_pred = bow2clf.predict(x_test)
-    # get_scores(y_test, bow2clf_labels_pred)
-
-    # hw2v = HateWord2Vec([paths['background'], paths['background2']], paths['w2v'])
-    # hw2v.fit(dirty_list, vocab, t=0.85, w=3) #0.85 3(4)
-    # hw2v_labels_pred = hw2v.predict(x_test)
-    # get_scores(y_test, hw2v_labels_pred)
-
-    # log_clf = LogisticRegression(C=10, class_weight='balanced', solver='saga', 
-    #                              n_jobs=-1, penalty='l1', max_iter=1000)
-    # hd2v = HateDoc2Vec(x_train, paths['d2v'])
-    # hd2v.fit(log_clf, y_train)
-    # hd2v_labels_pred = hd2v.predict(x_test)
-    # get_scores(y_test, hd2v_labels_pred)
     # while True:
     #     text = input('write some text: ')
     #     print('offensive' if hw2v.predict([text])[0] == 1 else 'not offensive')
 
-    # TODO: write function to poll for queries to be classified
     
 
 if __name__ == '__main__':
