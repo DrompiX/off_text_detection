@@ -22,17 +22,17 @@ class Hate2Vec(object):
         self.hd2v = HateDoc2Vec(X)
         self.hd2v.train(log_clf, Y)
         print('HateDoc2Vec was fitted.')
-        rf_clf = RandomForestClassifier(n_estimators=25, class_weight='balanced', 
-                                        n_jobs=-1, min_samples_leaf=1)
-        self.bow2clf = BOWClassifier(self.vocab, rf_clf)
-        self.bow2clf.fit(X, Y, self.paths['BOW'])
-        print('BOWClassifier was fitted.')
+        # rf_clf = RandomForestClassifier(n_estimators=25, class_weight='balanced', 
+        #                                 n_jobs=-1, min_samples_leaf=1)
+        # self.bow2clf = BOWClassifier(self.vocab, rf_clf)
+        # self.bow2clf.fit(X, Y, self.paths['BOW'])
+        # print('BOWClassifier was fitted.')
 
         hw2v_labels_pred = self.hw2v.predict(X)
         hd2v_labels_pred = self.hd2v.predict(X)
-        bow2clf_labels_pred = self.bow2clf.predict(X)
+        # bow2clf_labels_pred = self.bow2clf.predict(X)
 
-        X_meta = np.column_stack((hw2v_labels_pred, hd2v_labels_pred, bow2clf_labels_pred))
+        X_meta = np.column_stack((hw2v_labels_pred, hd2v_labels_pred))#, bow2clf_labels_pred))
         self.meta_clf = MultinomialNB()
         self.meta_clf.fit(X_meta, Y)
         print('Hate2Vec model was fitted!')
@@ -40,6 +40,6 @@ class Hate2Vec(object):
     def predict(self, X):
         hw2v_labels_pred = self.hw2v.predict(X)
         hd2v_labels_pred = self.hd2v.predict(X)
-        bow2clf_labels_pred = self.bow2clf.predict(X)
-        X_meta = np.column_stack((hw2v_labels_pred, hd2v_labels_pred, bow2clf_labels_pred))
+        # bow2clf_labels_pred = self.bow2clf.predict(X)
+        X_meta = np.column_stack((hw2v_labels_pred, hd2v_labels_pred))#, bow2clf_labels_pred))
         return self.meta_clf.predict(X_meta)

@@ -37,8 +37,8 @@ class HateWord2Vec(object):
                 new_dirty_list.append(word)
         
         self.dirty_list = new_dirty_list
-        # print('New dirty list')
-        # print(new_dirty_list)
+        print('New dirty list')
+        print(new_dirty_list)
 
     
     def predict(self, texts):
@@ -50,7 +50,7 @@ class HateWord2Vec(object):
                 if word in self.dirty_list:
                     offensive = True
                     break
-            
+
             results.append(1 if offensive else 0)
         
         return results
@@ -58,7 +58,7 @@ class HateWord2Vec(object):
     
     def _build_model(self, path_to_corp):
         data = self._read_data(path_to_corp)
-        model = gensim.models.Word2Vec(data, size=100, window=10, min_count=1, workers=4)
+        model = gensim.models.Word2Vec(data, size=50, window=10, min_count=1, workers=4)
         print('Start training model...')
         model.train(data, total_examples=len(data), epochs=15)
         print('Model training finished!')
