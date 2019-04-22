@@ -2,25 +2,23 @@ import os
 import pickle
 import numpy as np
 from utils import preprocess
+from gensim import corpora
 
 
 class BOWClassifier(object):
 
-    def __init__(self, vocab, clf):
-        self.vocab = vocab
+    def __init__(self, corpus, clf):
+        preproc_texts = [preprocess(text) for text in corpus]
+        self.dictionary = corpora.Dictionary(preproc_texts)
         self.clf = clf
 
     def _make_bow(self, texts, save_path=None):
         if save_path is None or not os.path.isfile(save_path):
-            vectors = np.zeros((len(texts), len(self.vocab)))
-            for t_id, text in enumerate(texts):
-                words = preprocess(text)
-                bag_vector = np.zeros(len(self.vocab))
-                for w in words:
-                    for i, word in enumerate(self.vocab):
-                        if w == word:
-                            bag_vector[i] += 1
-                vectors[t_id] = bag_vector
+            vectors = np.zeros((len(texts), len(self.dictionary.token2id.keys())))
+            for i, text in enumerate(texts):
+                bow = self.dictionary.doc2bow(preprocess(text))
+                for k, v in bow:
+                    vectors[i][k] = v
             
             if save_path is not None:
                 print('Saving bow vectors.')
@@ -34,11 +32,9 @@ class BOWClassifier(object):
         
         return vectors
     
-    def fit(self, corpus, labels, path):
+    def fit(self, corpus, labels, path=None):
         X = self._make_bow(corpus, path)
-        # print(f'X created, {X.shape}')
         Y = np.array(labels)
-        # print(f'Y created, {Y.shape}')
         print('Training model...')
         self.clf.fit(X, Y)
         print('Model was trained!')

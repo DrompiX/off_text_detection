@@ -27,7 +27,7 @@ class Hate2Vec(object):
         print('>> Fitting BOWClassifier...')
         rf_clf = RandomForestClassifier(n_estimators=25, class_weight='balanced', 
                                         n_jobs=-1, min_samples_leaf=3)
-        self.bow2clf = BOWClassifier(self.vocab, rf_clf)
+        self.bow2clf = BOWClassifier(X, rf_clf)
         self.bow2clf.fit(X, Y, self.paths['BOW'])
         print('>> BOWClassifier was fitted.')
 

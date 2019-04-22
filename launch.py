@@ -5,13 +5,6 @@ from sklearn.metrics import f1_score, roc_auc_score
 from hate2vec import Hate2Vec
 from utils import preprocess
 
-# TODO: remove
-# from bow_classifier import BOWClassifier
-# from sklearn.ensemble import RandomForestClassifier
-# from hateword2vec import HateWord2Vec
-# from hatedoc2vec import HateDoc2Vec
-# from sklearn.linear_model import LogisticRegression
-
 
 def read_data(path):
     ids, corpus, labels = [], [], []
@@ -26,7 +19,6 @@ def read_data(path):
 
 
 def create_vocabulary(corpus):
-    global vocab
     words = []
     for text in corpus:  
         words.extend(preprocess(text))
@@ -73,9 +65,8 @@ def launch():
 
     # while True:
     #     text = input('write some text: ')
-    #     print('offensive' if hw2v.predict([text])[0] == 1 else 'not offensive')
+    #     print('offensive' if h2v.predict([text])[0] == 1 else 'not offensive')
 
-    
 
 if __name__ == '__main__':
     launch()

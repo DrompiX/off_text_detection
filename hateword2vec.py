@@ -37,8 +37,6 @@ class HateWord2Vec(object):
                 new_dirty_list.append(word)
         
         self.dirty_list = new_dirty_list
-        # print('New dirty list')
-        # print(new_dirty_list)
     
     def predict(self, texts):
         results = []
