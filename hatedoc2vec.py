@@ -17,7 +17,7 @@ class HateDoc2Vec(object):
             self.model = Doc2Vec.load(model_path)
             print('Model was loaded!')
         
-    def train(self, clf, labels):
+    def fit(self, clf, labels):
         self.clf = clf
         X = self.model.docvecs.vectors_docs
         Y = labels 
@@ -33,7 +33,7 @@ class HateDoc2Vec(object):
     
     def _build_model(self, corpus):
         data = [TaggedDocument(preprocess(t), [i]) for i, t in enumerate(corpus)]
-        model = Doc2Vec(data, vector_size=100, window=10, min_count=1, workers=4)
+        model = Doc2Vec(data, vector_size=200, window=10, min_count=3, workers=4)
         print('Start training model...')
         model.train(data, total_examples=len(data), epochs=15)
         print('Model training finished!')

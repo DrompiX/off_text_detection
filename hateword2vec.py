@@ -16,8 +16,8 @@ class HateWord2Vec(object):
             self.model = gensim.models.Word2Vec.load(model_path)
             print('Model was loaded!')
         
-    def train(self, dirty_list, vocab, t, w):
-        """Train HateWord2Vec model
+    def fit(self, dirty_list, vocab, t, w):
+        """Fit HateWord2Vec model
         
         Arguments:
             texts {list[str]} -- texts to train model om
@@ -37,9 +37,8 @@ class HateWord2Vec(object):
                 new_dirty_list.append(word)
         
         self.dirty_list = new_dirty_list
-        print('New dirty list')
-        print(new_dirty_list)
-
+        # print('New dirty list')
+        # print(new_dirty_list)
     
     def predict(self, texts):
         results = []
@@ -54,11 +53,10 @@ class HateWord2Vec(object):
             results.append(1 if offensive else 0)
         
         return results
-                    
     
     def _build_model(self, path_to_corp):
-        data = self._read_data(path_to_corp)
-        model = gensim.models.Word2Vec(data, size=50, window=10, min_count=1, workers=4)
+        data = self._read_data(path_to_corp[0]) + self._read_data2(path_to_corp[1])
+        model = gensim.models.Word2Vec(data, size=100, window=10, min_count=1, workers=4)
         print('Start training model...')
         model.train(data, total_examples=len(data), epochs=15)
         print('Model training finished!')
@@ -69,6 +67,21 @@ class HateWord2Vec(object):
         with open(path) as fd:
             for line in fd:
                 data.append(preprocess(line.rstrip()))
+        return data
+    
+    def _read_data2(self, path):
+        data = []
+        labels = set()
+        with open(path) as csvfile:
+            rows = csv.reader(csvfile)
+            next(rows, None)
+            for label, tweet in rows:
+                if label not in labels:
+                    labels.add(label)
+                
+                if label != 'none':
+                    data.append(preprocess(tweet))
+        print(labels)
         return data
     
     def save_model(self, path):
